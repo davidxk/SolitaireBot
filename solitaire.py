@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from random import shuffle
+from collections import Counter
 class GameBoard:
     def __init__(self, tableau=None, stock=None, foundations=None, cards=None):
         if cards != None:
@@ -32,7 +33,7 @@ class GameBoard:
                 else:
                     string += "    "
             string += "\n"
-        print string
+        return string
 
     def printCard(self, card):
         if card is None:
@@ -111,7 +112,7 @@ class GameBoard:
             if not col:
                 continue
             for i in xrange(1, len(col)+1):
-                if i > 1 and not self.__concatenable__(col[-i-1], col[-i]):
+                if i > 1 and i < len(col) and not self.__concatenable__(col[-i-1], col[-i]):
                     break
                 card = col[-i]
                 for cj, ncol in enumerate(self.tableau):
@@ -124,6 +125,47 @@ class GameBoard:
                         self.tableau[ci] = col
                         self.tableau[cj] = self.tableau[cj][:-i]
         return moves
+
+    def clear(self):
+        while True:
+            self.__clear_flower__()
+
+    def __clear_flower__(self):
+        for deck in self.tableau:
+            if deck and deck[-1][1] == u"花":
+                deck.pop()
+
+    def __clear_dragon__(self):
+        # Count dragon
+        cnt = Counter()
+        for card in self.stock:
+            if card and card[0] is None:
+                cnt[card] += 1
+
+        for deck in self.tableau:
+            if deck and deck[-1][0] is None:
+                cnt[deck[-1]] += 1
+
+        # Fold dragon
+        retval = False
+        dragons = [key for key in cnt if cnt[key] == 4]
+        for dragon in dragons:
+            if dragon in self.stock or None in self.stock:
+                retval = True
+                for i, card in enumerate(self.stock):
+                    if card == dragon:
+                        self.stock[i] = None
+                for deck in self.tableau:
+                    if deck and deck[-1] == dragon:
+                        deck.pop()
+                self.stock.remove(None)
+        return retval
+
+    def __clear_foundation__():
+		minima = min(self.foundations, key=lambda x: x[-1] if x else 0)
+		for deck in self.tableau:
+			if deck and deck[-1][0] and deck[-1][1] == minima + 1:
+				deck.pop()
 
     def __stock_has_space__(self):
         return None in self.stock
@@ -157,7 +199,7 @@ def new_game():
 
 if __name__ == "__main__":
     ng = new_game()
-    ng.printGame()
+    print ng.printGame()
     print("Next moves:")
     for g in ng.nextMove():
-        g.printGame()
+        print g.printGame()
