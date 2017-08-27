@@ -16,7 +16,8 @@ def isConcatenable(card, head):
 
 # Order: 
 # * top tableau to tableau
-# * stock to tableau or foundation
+# * stock to tableau 
+# * stock to foundation
 # * tableau to foundation
 # * tableau dragon to stock
 # * tableau lower to tableau
@@ -34,28 +35,16 @@ class Solitaire:
         return game
     
     def nextMove(self, board):
-        moves = []
-        self.__getTableauToFoundation__(board, moves)
-        self.__getTableauToStock__(board, moves)
-        self.__getMovesFromStock__(board, moves)
-        self.__getTableauToTableau__(board, moves)
+        tabToFound = self.__getTableauToFoundation__(board)
+        draToStock, numToStock = self.__getTableauToStock__(board)
+        stockToTableau, stockToFoundation = self.__getMovesFromStock__(board)
+        topTabToTab, lowTabToTab = self.__getTableauToTableau__(board)
+        moves = numToStock + lowTabToTab + draToStock + tabToFound + \
+                stockToFoundation + topTabToTab + stockToTableau
         return moves
 
-    def __getTableauToStock__(self, board, moves):
-        index = find(board.stock, None)
-        if index >= 0:
-            for col in board.tableau:
-                if len(col) > 0:
-                    card = col.pop()
-                    board.stock[index] = card
-                    if not card.number:
-                        moves.append(deepcopy(board))
-                    else:
-                        moves.insert(0, deepcopy(board))
-                    col.append(card) # recovery
-            board.stock[index] = None # recovery
-
-    def __getTableauToFoundation__(self, board, moves):
+    def __getTableauToFoundation__(self, board):
+        moves = []
         for col in board.tableau:
             if col and col[-1].number and \
                     col[-1].number == board.foundation[col[-1].color]+1:
@@ -64,40 +53,68 @@ class Solitaire:
                 moves.append(deepcopy(board))
                 board.foundation[card.color] -= 1
                 col.append(card)
+        return moves
 
-    def __getMovesFromStock__(self, board, moves):
+    def __getTableauToStock__(self, board):
+        dragonToStock, numberToStock = [], []
+        index = find(board.stock, None)
+        if index >= 0:
+            for col in board.tableau:
+                if len(col) > 0:
+                    card = col.pop()
+                    board.stock[index] = card
+                    if not card.number: # Dragon
+                        dragonToStock.append(deepcopy(board))
+                    else:               # Number
+                        numberToStock.insert(0, deepcopy(board))
+                    col.append(card)    # Recovery
+            board.stock[index] = None   # Recovery
+        return dragonToStock, numberToStock
+
+    def __getMovesFromStock__(self, board):
+        stockToTableau, stockToFoundation = [], []
         for i, card in enumerate(board.stock):
             if card:
                 board.stock[i] = None
                 # To tableau
-                index = find(board.tableau, [])
                 for col in board.tableau:
-                    if len(col) == 0 or isConcatenable(card, col[-1]):
+                    if not col and card.number or \
+                            col and isConcatenable(card, col[-1]):
                         col.append(card)
-                        moves.append(deepcopy(board))
+                        stockToTableau.append(deepcopy(board))
                         col.pop()
                 # To foundations
                 if card.number and \
                         card.number == board.foundation[card.color] + 1:
                     board.foundation[card.color] += 1
-                    moves.append(deepcopy(board))
+                    stockToFoundation.append(deepcopy(board))
                     board.foundation[card.color] -= 1 # recovery
                 board.stock[i] = card # recovery
+        return stockToTableau, stockToFoundation
 
-    def __getTableauToTableau__(self, board, moves):
+    def __getTableauToTableau__(self, board):
+        def addMoves(board, col, j, moves, isHead = False):
+            card = col[j]
+            for k, ncol in enumerate(board.tableau):
+                if ncol and isConcatenable(card, ncol[-1]) or \
+                        not ncol and j != 0 and isHead:
+                    isHead = False
+                    stack = col[j:]
+                    del col[j:]
+                    ncol += stack
+                    moves.append(deepcopy(board))
+                    col += stack
+                    del ncol[j - len(col):]
+
+        topTabToTab, lowTabToTab = [], []
         for i, col in enumerate(board.tableau):
-            for j in range(1, len(col) + 1):
-                if not (j == 1 or isConcatenable(col[-j + 1], col[-j])):
+            for j in range(len(col) - 1, -1, -1):
+                if j == 0 or not isConcatenable(col[j], col[j - 1]):
+                    addMoves(board, col, j, topTabToTab, True)
                     break
-                card = col[-j]
-                for k, ncol in enumerate(board.tableau):
-                    if not ncol or isConcatenable(card, ncol[-1]):
-                        stack = col[-j:]
-                        del col[-j:]
-                        ncol += stack
-                        moves.append(deepcopy(board))
-                        del ncol[-j:]
-                        col += stack
+                else:
+                    addMoves(board, col, j, lowTabToTab)
+        return topTabToTab, lowTabToTab
 
     def __clear_board__(self, board):
         self.boardCleaner.clearBoard(board)
@@ -112,7 +129,6 @@ class Solitaire:
         print board
         assert board.tableau.count([]) == 8
         return True
-        return game
 
 class BoardCleaner:
     def clearBoard(self, board):
