@@ -4,13 +4,11 @@ from Solitaire import Solitaire
 
 def dfs(solitaire):
     source = solitaire.newGame()
+    solitaire.__clear_board__(source)
     front = [source]
     parent = {source: None}
-    solitaire.__clear_board__(source)
-    cnt = 0
     while front:
         node = front.pop()
-        #print node
         if solitaire.isWin(node):
             break
         for child in solitaire.nextMove(node):
@@ -18,8 +16,6 @@ def dfs(solitaire):
             if child not in parent:
                 front.append(child)
                 parent[child] = node
-        cnt += 1
-    print cnt
     return parent, node
 
 def bfs(solitaire):
