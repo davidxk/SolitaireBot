@@ -42,6 +42,16 @@ class Board(object):
             output += "\n"
         return output
 
+    def __repr__(self):
+        key = str(self.stock)
+        key += str(self.tableau)
+        key += str([self.foundation[color] for color in range(3)])
+        return key
+
+    def __eq__(self, other):
+        return self.stock == other.stock and self.tableau == other.tableau and\
+                self.foundation == other.foundation
+
     def __hash__(self):
         key = str(self.stock)
         key += str(self.tableau)
@@ -68,3 +78,9 @@ class Card:
         if pigment:
             result = pigmap[colormap[self.color]] + result + pigmap["normal"]
         return result
+
+    def __repr__(self):
+        return str( (self.color, self.number) )
+
+    def __eq__(self, other):
+        return other and self.color == other.color and self.number == other.number

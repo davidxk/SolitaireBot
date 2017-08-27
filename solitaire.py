@@ -1,205 +1,175 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
+from Board import Board
+from Board import Card
+from collections import defaultdict
+from copy import deepcopy
 from random import shuffle
-from collections import Counter
-class GameBoard:
-    def __init__(self, tableau=None, stock=None, foundations=None, cards=None):
-        if cards != None:
-            # bottom, left, right
-            self.tableau = [[] for i in range(8)]
-            self.stock = [None] * 3
-            self.foundations = [[], [], []]
-            for i in range(5):
-                for j in range(8):
-                    self.tableau[j].append(cards.pop())
-        if tableau != None:
-            self.tableau = tableau
-            self.stock = stock
-            self.foundations = foundations
 
-    def printGame(self):
-        string = unicode()
-        for card in self.stock:
-            string += self.printCard(card)
-        string += " " * 8
-        for deck in self.foundations:
-            string += self.printCard(deck[-1] if len(deck) else None)
-        string += "\n\n"
-        for i in range(max(len(deck) for deck in self.tableau)):
-            for j in range(8):
-                if i < len(self.tableau[j]):
-                    string += self.printCard(self.tableau[j][i])
-                else:
-                    string += "    "
-            string += "\n"
-        return string
+def find(array, elem):
+    for i, x in enumerate(array):
+        if x == elem:
+            return i
+    return -1
 
-    def printCard(self, card):
-        if card is None:
-            return "___ "
-        elif card[1] in u"中发白花":
-            return " " + card[1] + " "
-        else:
-            return str().join([str(card[0]), card[1]]) + " "
+def isConcatenable(card, head):
+    return card.number and head.number and \
+            card.number == head.number - 1 and card.color != head.color
 
-    def nextMove(self):
-        """
-        Return every possible move in an array
-        """
-        from copy import deepcopy
+# Order: 
+# * top tableau to tableau
+# * stock to tableau or foundation
+# * tableau to foundation
+# * tableau dragon to stock
+# * tableau lower to tableau
+# * tableau number to stock
+class Solitaire:
+    def __init__(self):
+        self.boardCleaner = BoardCleaner()
+
+    def newGame(self):
+        cards = [Card(color, i) for color in range(3) for i in range(1, 10)]
+        cards += [Card(color, None) for color in range(3, 6) for i in range(4)]
+        cards.append( Card(6, None) )
+        shuffle( cards )
+        game = Board(cards)
+        return game
+    
+    def nextMove(self, board):
         moves = []
-
-        # move cards from tableau to stock
-        if self.__stock_has_space__():
-            index = self.__stock_space_index__()
-            for col in self.tableau:
-                if not col:
-                    continue
-                card = col.pop()
-                self.stock[index] = card
-                moves.append(deepcopy(self))
-                col.append(card) # recovery
-            self.stock[index] = None # recovery
-
-        # move cards from stock
-        for i, card in enumerate(self.stock):
-            if card != None:
-                self.stock[i] = None
-                # to tableau
-                if self.__tableau_has_space__():
-                    index = self.__tableau_space_index__()
-                    self.tableau[index].append(card)
-                    moves.append(deepcopy(self))
-                    self.tableau[index].pop() # recovery
-                if card[0] != None: # not a dragon
-                    for col in self.tableau:
-                        if col and self.__concatenable__(card, col[-1]):
-                            col.append(card)
-                            moves.append(deepcopy(self))
-                            col.pop()
-                # to foundations
-                for j, foundation in enumerate(self.foundations):
-                    if self.__successive__(card, foundation):
-                        foundation.append(card)
-                        moves.append(deepcopy(self))
-                        foundation.pop() # recovery
-                        break
-                self.stock[i] = card # recovery
-
-        # move cards from tableau to foundations
-        for col in self.tableau:
-            for foundation in self.foundations:
-                if col and self.__successive__(col[-1], foundation):
-                    card = col.pop()
-                    foundation.append(card)
-                    moves.append(deepcopy(self))
-                    foundation.pop()
-                    col.append(card)
-                    break
-
-        # move cards from tableau to tableau
-        if self.__tableau_has_space__():
-            index = self.__tableau_space_index__()
-            for col in self.tableau:
-                if len(col)>1:
-                    card = col.pop()
-                    self.tableau[index].append(card)
-                    moves.append(deepcopy(self))
-                    col.append(card)
-                    self.tableau[index].pop() # recovery
-        for ci, col in enumerate(self.tableau):
-            if not col:
-                continue
-            for i in xrange(1, len(col)+1):
-                if i > 1 and i < len(col) and not self.__concatenable__(col[-i-1], col[-i]):
-                    break
-                card = col[-i]
-                for cj, ncol in enumerate(self.tableau):
-                    if not ncol or col == ncol:
-                        continue
-                    if self.__concatenable__(card, ncol[-1]):
-                        self.tableau[cj] = self.tableau[cj] + col[-i:]
-                        self.tableau[ci] = col[:-i]
-                        moves.append(deepcopy(self))
-                        self.tableau[ci] = col
-                        self.tableau[cj] = self.tableau[cj][:-i]
+        self.__getTableauToFoundation__(board, moves)
+        self.__getTableauToStock__(board, moves)
+        self.__getMovesFromStock__(board, moves)
+        self.__getTableauToTableau__(board, moves)
         return moves
 
-    def clear(self):
-        while True:
-            self.__clear_flower__()
+    def __getTableauToStock__(self, board, moves):
+        index = find(board.stock, None)
+        if index >= 0:
+            for col in board.tableau:
+                if len(col) > 0:
+                    card = col.pop()
+                    board.stock[index] = card
+                    if not card.number:
+                        moves.append(deepcopy(board))
+                    else:
+                        moves.insert(0, deepcopy(board))
+                    col.append(card) # recovery
+            board.stock[index] = None # recovery
 
-    def __clear_flower__(self):
-        for deck in self.tableau:
-            if deck and deck[-1][1] == u"花":
-                deck.pop()
+    def __getTableauToFoundation__(self, board, moves):
+        for col in board.tableau:
+            if col and col[-1].number and \
+                    col[-1].number == board.foundation[col[-1].color]+1:
+                card = col.pop()
+                board.foundation[card.color] += 1
+                moves.append(deepcopy(board))
+                board.foundation[card.color] -= 1
+                col.append(card)
 
-    def __clear_dragon__(self):
-        # Count dragon
-        cnt = Counter()
-        for card in self.stock:
-            if card and card[0] is None:
-                cnt[card] += 1
+    def __getMovesFromStock__(self, board, moves):
+        for i, card in enumerate(board.stock):
+            if card:
+                board.stock[i] = None
+                # To tableau
+                index = find(board.tableau, [])
+                for col in board.tableau:
+                    if len(col) == 0 or isConcatenable(card, col[-1]):
+                        col.append(card)
+                        moves.append(deepcopy(board))
+                        col.pop()
+                # To foundations
+                if card.number and \
+                        card.number == board.foundation[card.color] + 1:
+                    board.foundation[card.color] += 1
+                    moves.append(deepcopy(board))
+                    board.foundation[card.color] -= 1 # recovery
+                board.stock[i] = card # recovery
 
-        for deck in self.tableau:
-            if deck and deck[-1][0] is None:
-                cnt[deck[-1]] += 1
+    def __getTableauToTableau__(self, board, moves):
+        for i, col in enumerate(board.tableau):
+            for j in range(1, len(col) + 1):
+                if not (j == 1 or isConcatenable(col[-j + 1], col[-j])):
+                    break
+                card = col[-j]
+                for k, ncol in enumerate(board.tableau):
+                    if not ncol or isConcatenable(card, ncol[-1]):
+                        stack = col[-j:]
+                        del col[-j:]
+                        ncol += stack
+                        moves.append(deepcopy(board))
+                        del ncol[-j:]
+                        col += stack
 
-        # Fold dragon
-        retval = False
-        dragons = [key for key in cnt if cnt[key] == 4]
-        for dragon in dragons:
-            if dragon in self.stock or None in self.stock:
-                retval = True
-                for i, card in enumerate(self.stock):
-                    if card == dragon:
-                        self.stock[i] = None
-                for deck in self.tableau:
-                    if deck and deck[-1] == dragon:
-                        deck.pop()
-                self.stock.remove(None)
-        return retval
+    def __clear_board__(self, board):
+        self.boardCleaner.clearBoard(board)
 
-    def __clear_foundation__():
-		minima = min(self.foundations, key=lambda x: x[-1] if x else 0)
-		for deck in self.tableau:
-			if deck and deck[-1][0] and deck[-1][1] == minima + 1:
-				deck.pop()
+    def isWin(self, board):
+        for color in range(3):
+            if board.foundation[color] != 9:
+                return False
+        if board.stock.count([]) < 3:
+            return False
+        #assert len(board.stock) == 0
+        print board
+        assert board.tableau.count([]) == 8
+        return True
+        return game
 
-    def __stock_has_space__(self):
-        return None in self.stock
+class BoardCleaner:
+    def clearBoard(self, board):
+        self.__clear_flower__(board)
+        while self.__clear_dragon__(board) or self.__clear_foundation__(board):
+            self.__clear_flower__(board)
 
-    def __stock_space_index__(self):
-        return self.stock.index(None)
+    def __clear_flower__(self, board):
+        for col in board.tableau:
+            if col and col[-1].color == 6:
+                col.pop()
 
-    def __tableau_has_space__(self):
-        return [] in self.tableau
+    def __clear_dragon__(self, board):
+        indexInStock = { color: -1 for color in range(3, 6)}
+        stockDragonIndices = defaultdict(list)
+        tableauDragonIndices = defaultdict(list)
+        for i in range(3):
+            card = board.stock[i]
+            if card is None:
+                for color in indexInStock:
+                    if indexInStock[color] == -1:
+                        indexInStock[color] = i
+            elif card and card.number is None: # Flower cleared, must be Dragon
+                stockDragonIndices[card.color].append(i)
+                indexInStock[card.color] = i
 
-    def __tableau_space_index__(self):
-        return self.tableau.index([])
+        for i, col in enumerate(board.tableau):
+            if col and col[-1].number is None:
+                tableauDragonIndices[col[-1].color].append(i)
 
-    def __concatenable__(self, card, head):
-        return card[0] != None and head[0] != None and \
-                card[0] == head[0]-1 and card[1] != head[1]
+        for color in range(3, 6):
+            if indexInStock[color] >= 0 and len(stockDragonIndices[color]) + \
+                    len(tableauDragonIndices[color]) == 4:
+                for i in stockDragonIndices[color]:
+                    board.stock[i] = None
+                for i in tableauDragonIndices[color]:
+                    board.tableau[i].pop()
+                board.stock[indexInStock[color]] = []
+                return True
+        return False
 
-    def __successive__(self, card, foundation):
-        return card[0] != None and \
-                ((not foundation and card[0] == 1) or \
-                (foundation and card[0] == foundation[-1][0] + 1 and \
-                card[1] == foundation[-1][1]))
+    def __clear_foundation__(self, board):
+        minima = min(board.foundation.values())
+        colors = filter(lambda x: board.foundation[x] <= minima, range(3))
+        for col in board.tableau:
+            if col and col[-1].color in colors and \
+                    col[-1].number == minima + 1:
+                board.foundation[col[-1].color] += 1
+                col.pop()
+                return True
 
-def new_game():
-    cards = [(i, color) for i in range(1, 10) for color in [u"饼",u"条",u"万"]]
-    cards += [(None, color) for color in [u"中",u"发",u"白"] for i in range(4)]
-    cards.append( (None, u"花") )
-    shuffle( cards )
-    game = GameBoard(cards=cards)
-    return game
+        for color in range(3):
+            if board.foundation[color] == 1:
+                for col in board.tableau:
+                    if col and col[-1].color == color and col[-1].number == 2:
+                        board.foundation[col[-1].color] += 1
+                        col.pop()
+                        return True
 
-if __name__ == "__main__":
-    ng = new_game()
-    print ng.printGame()
-    print("Next moves:")
-    for g in ng.nextMove():
-        print g.printGame()
+        return False
