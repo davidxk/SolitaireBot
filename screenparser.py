@@ -19,7 +19,6 @@ class ScreenParser:
         tableau = self.__split_tableau_area__()
         foundation = self.__split_foundation_area_()
         return Board(tableau=tableau, foundation=foundation)
-        return (tableau, foundation)
 
     def __split_tableau_area__(self):
         (left, upper, right, lower) = (173, 310, 187, 324)
@@ -56,8 +55,7 @@ class CardRecognizer:
     Card Recognizer
     """
     def __init__(self):
-        self.type_model = np.load('card_type')
-        print(self.type_model)
+        self.type_model = np.load('card_type.npy')
 
     def recognize_card(self, im):
         """
@@ -65,32 +63,30 @@ class CardRecognizer:
         """
         src = np.array(list(im.getdata()))
         typ = self.__recognize_card_type__(src)
-        if typ and typ < 9:
+        if typ and typ < 10:
             color = self.__recognize_card_color__(src)
-            return Card(color, typ+1)
+            return Card(color, typ)
         elif typ:
-            # 3:Center, 4:Rich, 5:White, 6:Flower
-            return Card(typ-6, None)
+            return Card(typ-7, None)
         else:
             return None
 
     def __recognize_card_type__(self, src):
         threshold = 20
 
+        test = ((src[0]-src)>8).any(1)
         for i in xrange(13):
-            diff = self.type_model[i] - src
-            if np.sum(np.abs(diff)) < threshold:
-                return i
-            else:
-                return None
+            if np.sum(np.logical_xor(self.type_model[i], test)) < threshold:
+                return i+1
+        return None
 
     def __recognize_card_color__(self, src):
-        (r_threshold, g_threshold, threshold) = (80, 50, 50)
+        (r_threshold, g_threshold, threshold) = (80, 50, 30)
 
-        dif = src[1][0][0] - src[1][0]
+        dif = src - src[1]
         if np.sum(dif[:,0]<(dif[:,1]-r_threshold)) > threshold:
             return 1 # red
         if np.sum(dif[:,1]<(dif[:,0]-g_threshold)) > threshold:
-            return 2 # green
+            return 0 # green
         else:
-            return 3 # black
+            return 2 # black
