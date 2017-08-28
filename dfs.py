@@ -9,13 +9,13 @@ def dfs(solitaire):
     parent = {source: None}
     while front:
         node = front.pop()
-        if solitaire.isWin(node):
-            break
         for child in solitaire.nextMove(node):
             solitaire.__clear_board__(child)
             if child not in parent:
                 front.append(child)
                 parent[child] = node
+                if solitaire.isWin(child):
+                    return parent, child
     return parent, node
 
 def bfs(solitaire):
@@ -37,9 +37,6 @@ def bfs(solitaire):
 
 if __name__ == "__main__":
     parent, target = dfs(Solitaire())
-    print target in parent
-    node = target
-    print node in parent
     path = [target]
     while parent[node]:
         path.append(parent[node])

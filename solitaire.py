@@ -38,8 +38,8 @@ class Solitaire:
         tabToFound = self.__getTableauToFoundation__(board)
         draToStock, numToStock = self.__getTableauToStock__(board)
         stockToTableau, stockToFoundation = self.__getMovesFromStock__(board)
-        topTabToTab, lowTabToTab = self.__getTableauToTableau__(board)
-        moves = numToStock + lowTabToTab + draToStock + tabToFound + \
+        topTabToTab, lowTabToTab, toEmpty = self.__getTableauToTableau__(board)
+        moves = numToStock + lowTabToTab + toEmpty + draToStock + tabToFound + \
                 stockToFoundation + topTabToTab + stockToTableau
         return moves
 
@@ -66,7 +66,7 @@ class Solitaire:
                     if not card.number: # Dragon
                         dragonToStock.append(deepcopy(board))
                     else:               # Number
-                        numberToStock.insert(0, deepcopy(board))
+                        numberToStock.append(deepcopy(board))
                     col.append(card)    # Recovery
             board.stock[index] = None   # Recovery
         return dragonToStock, numberToStock
@@ -96,17 +96,16 @@ class Solitaire:
         def addMoves(board, col, j, moves, isHead = False):
             card = col[j]
             for k, ncol in enumerate(board.tableau):
-                if ncol and isConcatenable(card, ncol[-1]) or \
-                        not ncol and j != 0 and isHead:
-                    isHead = False
-                    stack = col[j:]
-                    del col[j:]
-                    ncol += stack
+                if ncol and isConcatenable(card, ncol[-1]):
+                    stack = col[j:]; del col[j:]; ncol += stack
                     moves.append(deepcopy(board))
-                    col += stack
-                    del ncol[j - len(col):]
+                    col += stack; del ncol[j - len(col):]
+                elif not ncol and j != 0 and isHead:
+                    stack = col[j:]; del col[j:]; ncol += stack
+                    toEmpty.append(deepcopy(board))
+                    col += stack; del ncol[j - len(col):]
 
-        topTabToTab, lowTabToTab = [], []
+        topTabToTab, lowTabToTab, toEmpty = [], [], []
         for i, col in enumerate(board.tableau):
             for j in range(len(col) - 1, -1, -1):
                 if j == 0 or not isConcatenable(col[j], col[j - 1]):
@@ -114,7 +113,7 @@ class Solitaire:
                     break
                 else:
                     addMoves(board, col, j, lowTabToTab)
-        return topTabToTab, lowTabToTab
+        return topTabToTab, lowTabToTab, toEmpty
 
     def __clear_board__(self, board):
         self.boardCleaner.clearBoard(board)
