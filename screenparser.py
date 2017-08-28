@@ -72,7 +72,7 @@ class CardRecognizer:
             return None
 
     def __recognize_card_type__(self, src):
-        threshold = 20
+        threshold = 40
 
         test = ((src[0]-src)>8).any(1)
         for i in xrange(13):
