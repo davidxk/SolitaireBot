@@ -6,8 +6,7 @@ from Solitaire import Solitaire
 if __name__ == "__main__":
     parser = ScreenParser()
     board = parser.parse_screenshot(argv.pop())
-    print "Parsed board:"
-    print board
     path = dfs_wrapper(Solitaire(), board)
-    for state in path:
+    for i, state in enumerate(path):
+        print i
         print state
