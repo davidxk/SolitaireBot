@@ -37,6 +37,7 @@ def bfs(solitaire):
 
 if __name__ == "__main__":
     parent, target = dfs(Solitaire())
+    node = target
     path = [target]
     while parent[node]:
         path.append(parent[node])
