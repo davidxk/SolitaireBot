@@ -124,8 +124,6 @@ class Solitaire:
                 return False
         if board.stock.count([]) < 3:
             return False
-        #assert len(board.stock) == 0
-        print board
         assert board.tableau.count([]) == 8
         return True
 

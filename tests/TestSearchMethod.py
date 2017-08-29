@@ -1,11 +1,12 @@
+# Uncomment the test you wish to run
+# cp TestSearchMethod.py ..
+# python TestSearchMethod.py
+
 from Board import Board
 from Board import Card
-from copy import deepcopy
-from collections import deque
+from dfs import dfs_wrapper
 from Solitaire import Solitaire
 from test_cases import testCases
-from TestDepthLimited import depth_limited
-from dfs import dfs_wrapper
 
 class TestSearchMethod:
     def __init__(self, search):

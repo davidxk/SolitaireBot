@@ -1,11 +1,11 @@
 from Board import Board
 from Board import Card
-from copy import copy
 from Solitaire import find
 from Solitaire import Solitaire
+import unittest
 
-class TestSolitaire:
-    def __init__(self):
+class TestSolitaire(unittest.TestCase):
+    def setUp(self):
         self.sol = Solitaire()
         self.cards = [Card(color, num) for num in range(1, 10) \
                 for color in range(3)]
@@ -17,16 +17,17 @@ class TestSolitaire:
         state = Board()
         state.stock = [[] for i in range(3)]
         state.foundation = { color: 9 for color in range(3) }
-        print self.sol.isWin(state)
+        self.assertTrue( self.sol.isWin(state) )
+        self.assertFalse( self.sol.isWin(Board(self.cards)) )
 
     def testTableauToStock(self):
-        game = Board(copy(self.cards))
+        game = Board(self.cards)
         moves = self.sol.__getTableauToStock__(game)
         for move in moves:
             print move
 
     def testMovesFromStock(self):
-        game = Board(copy(self.cards))
+        game = Board(self.cards)
         game.stock[find(game.stock, None)] = game.tableau[-1].pop()
         game.stock[find(game.stock, None)] = game.tableau[-2].pop()
         game.stock[find(game.stock, None)] = game.tableau[-3].pop()
@@ -36,7 +37,7 @@ class TestSolitaire:
             print move
 
     def testTableauToFoundation(self):
-        game = Board(copy(self.cards))
+        game = Board(self.cards)
         moves = self.sol.__getTableauToFoundation__(game)
         for move in moves:
             print move
@@ -54,7 +55,7 @@ class TestSolitaire:
             print move
 
     def testTableauToTableau2(self):
-        cards = copy(self.cards)
+        cards = self.cards
         cards.reverse()
         game = Board(cards)
         game.tableau[0] = []
@@ -76,7 +77,7 @@ class TestSolitaire:
             print move
 
     def testNextMove(self):
-        game = Board(copy(self.cards))
+        game = Board(self.cards)
         print game
         for move in self.sol.nextMove(game):
             print move
@@ -160,4 +161,4 @@ if __name__ == "__main__":
     #ts.testNextMoveFinishing()
     #ts.testNextMoveFinishing2()
     #ts.testNextMoveFinishing3()
-    ts.testNextMoveFinishing4()
+    #ts.testNextMoveFinishing4()

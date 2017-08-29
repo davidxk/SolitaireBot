@@ -2,8 +2,9 @@ from Board import Card
 from Board import Board
 from copy import deepcopy
 from random import shuffle
+import unittest
 
-class TestCard:
+class TestCard(unittest.TestCase):
     def testToString(self):
         for color in range(3):
             for number in range(1, 10):
@@ -11,24 +12,8 @@ class TestCard:
         for color in range(3, 7):
             print Card(color, None).toString(True)
 
-def dfs(solitaire):
-    source = solitaire.newGame()
-    stack = [source]
-    parent = {source: None}
-    cnt = 0
-    while stack and cnt < 50:
-        node = stack.pop()
-        if solitaire.isWin(node):
-            break
-        for child in solitaire.nextMove(node):
-            if child not in parent:
-                stack.append(child)
-                parent[child] = node
-        cnt += 1
-    return parent
-
-class TestBoard:
-    def __init__(self):
+class TestBoard(unittest.TestCase):
+    def setUp(self):
         cards = [Card(color, i) for color in range(3) for i in range(1, 10)]
         cards += [Card(color, None) for color in range(3, 6) for i in range(4)]
         cards.append( Card(6, None) )
@@ -44,22 +29,12 @@ class TestBoard:
         self.board.tableau[0].append( self.board.stock[0] )
         self.board.stock[0] = None
         grandchild = deepcopy(self.board)
-        print self.board == grandchild
-        print self.board.__hash__()
-        print child.__hash__()
-        print grandchild.__hash__()
-        print len({self.board, grandchild})
-        seen = {self.board: 1}
-        print grandchild in seen
-        print seen[grandchild]
 
-    def testHash2(self):
-        parent = dfs(Solitaire())
-        
+        self.assertEqual( self.board, grandchild )
+        self.assertNotEqual( self.board.__hash__(), child.__hash__() )
+        self.assertEqual( len({self.board, grandchild}), 1)
+        seen = {self.board: 1}
+        self.assertTrue( grandchild in seen )
 
 if __name__ == "__main__":
-    tc = TestCard()
-    tc.testToString()
-    tb = TestBoard()
-    tb.testStr()
-    tb.testHash()
+    unittest.main()
