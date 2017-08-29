@@ -5,58 +5,46 @@ from collections import deque
 from Solitaire import Solitaire
 from test_cases import testCases
 from TestDepthLimited import depth_limited
-
-def dfs(solitaire, num, source = None, isPrint = True):
-    if source is None:
-        source = solitaire.newGame()
-    solitaire.__clear_board__(source)
-    front = [source]
-    parent = {source: None}
-    cnt = 0
-    while front and cnt < num:
-        node = front.pop()
-        if isPrint:
-            print cnt
-            print node
-        for child in solitaire.nextMove(node):
-            solitaire.__clear_board__(child)
-            if child not in parent:
-                front.append(child)
-                parent[child] = node
-                if solitaire.isWin(child):
-                    return parent, child
-        cnt += 1
-    return None
+from dfs import dfs_wrapper
 
 class TestSearchMethod:
     def __init__(self, search):
         self.sol = Solitaire()
         self.search = search
 
-    def testNextMoveRandom(self, isPrint = True):
-        self.search(self.sol, 1000, isPrint = isPrint)
+    def testNextMoveRandom(self):
+        self.search(self.sol)
 
-    def testNextMoveCases(self, i, steps = 2000, isPrint = False):
+    def testNextMoveCases(self, i):
         board = Board()
         board.tableau = testCases[i - 1]
-        #self.search(self.sol, steps, board, isPrint)
-        self.search(self.sol, source = board, limit = 50)
+        self.search(self.sol, source = board)
 
     def testSuccessRate(self):
         cnt = 100
         for i in range(100):
             print i
-            #retval = self.search(self.sol, 2000, isPrint = False)
-            retval = self.search(self.sol, limit = 50)
-            if retval is None:
+            path = self.search(self.sol)
+            if path is None:
                 cnt -= 1
                 print "fail"
-        print cnt / 100.0
+        print cnt, "%"
+
+    def getAverageDepth(self):
+        cnt, totalLenth, maximum = 0, 0, 0
+        for i in range(100):
+            path = dfs_wrapper(self.sol)
+            if path is not None:
+                cnt += 1; totalLenth += len(path)
+                maximum = max(len(path), maximum)
+        print cnt
+        print 1.0 * totalLenth / cnt
+        print maximum
 
 if __name__ == "__main__":
-    td = TestSearchMethod(depth_limited)
-    #td.testNextMoveRandom(False)
-    #td.testNextMoveCases(1)
+    td = TestSearchMethod(dfs_wrapper)
+    td.testNextMoveRandom()
+    td.testNextMoveCases(1)
     #td.testNextMoveCases(2)
     #td.testNextMoveCases(3)
     #td.testNextMoveCases(4)
@@ -65,4 +53,5 @@ if __name__ == "__main__":
     #td.testNextMoveCases(7)
     #td.testNextMoveCases(8)
     #td.testNextMoveCases(9)
-    td.testSuccessRate()
+    #td.testSuccessRate()
+    #td.getAverageDepth()

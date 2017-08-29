@@ -35,8 +35,8 @@ class Solitaire:
         return game
     
     def nextMove(self, board):
-        tabToFound = self.__getTableauToFoundation__(board)
-        draToStock, numToStock = self.__getTableauToStock__(board)
+        tabToFound                   = self.__getTableauToFoundation__(board)
+        draToStock, numToStock            = self.__getTableauToStock__(board)
         stockToTableau, stockToFoundation = self.__getMovesFromStock__(board)
         topTabToTab, lowTabToTab, toEmpty = self.__getTableauToTableau__(board)
         moves = numToStock + lowTabToTab + toEmpty + draToStock + tabToFound + \
@@ -58,8 +58,8 @@ class Solitaire:
     def __getTableauToStock__(self, board):
         dragonToStock, numberToStock = [], []
         index = find(board.stock, None)
-        if index >= 0:
-            for col in board.tableau:
+        if index >= 0:                  # If there is free space in stock
+            for col in board.tableau:   # Find a card to be moved to stack
                 if len(col) > 0:
                     card = col.pop()
                     board.stock[index] = card

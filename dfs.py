@@ -1,14 +1,29 @@
-from copy import deepcopy
-from collections import deque
 from Solitaire import Solitaire
 
-def dfs(solitaire):
-    source = solitaire.newGame()
+def dfs_wrapper(solitaire, source = None, isPrint = False):
+    parent, target = dfs(solitaire, 2000, source, isPrint = False)
+    if not parent:
+        return None
+    node = target
+    path = [target]
+    while parent[node]:
+        path.append(parent[node])
+        node = parent[node]
+    path.reverse()
+    return path
+
+def dfs(solitaire, limit, source = None, isPrint = True):
+    if source is None:
+        source = solitaire.newGame()
     solitaire.__clear_board__(source)
     front = [source]
     parent = {source: None}
-    while front:
+    cnt = 0
+    while front and cnt < limit:
         node = front.pop()
+        if isPrint:
+            print cnt
+            print node
         for child in solitaire.nextMove(node):
             solitaire.__clear_board__(child)
             if child not in parent:
@@ -16,32 +31,13 @@ def dfs(solitaire):
                 parent[child] = node
                 if solitaire.isWin(child):
                     return parent, child
-    return parent, node
-
-def bfs(solitaire):
-    source = solitaire.newGame()
-    front = deque([source])
-    parent = {source: None}
-    solitaire.__clear_board__(source)
-    while front:
-        node = front.popleft()
-        #print node
-        if solitaire.isWin(node):
-            break
-        for child in solitaire.nextMove(node):
-            solitaire.__clear_board__(child)
-            if child not in parent:
-                front.append(child)
-                parent[child] = node
-    return parent, node
+        cnt += 1
+    return None, None
 
 if __name__ == "__main__":
-    parent, target = dfs(Solitaire())
-    node = target
-    path = [target]
-    while parent[node]:
-        path.append(parent[node])
-        node = parent[node]
-    path.reverse()
-    for state in path:
-        print state
+    path = dfs_wrapper(Solitaire())
+    if path is None:
+        print "Fail"
+    else:
+        for state in path:
+            print state
