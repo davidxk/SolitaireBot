@@ -10,9 +10,12 @@ def find(array, elem):
             return i
     return -1
 
-def isConcatenable(card, head):
+def isAppendable(card, head):
     return card.number and head.number and \
             card.number == head.number - 1 and card.color != head.color
+
+def canAddToFoundation(board, card):
+    return card.number and card.number == board.foundation[card.color] + 1
 
 # Order: 
 # * top tableau to tableau
@@ -22,7 +25,7 @@ def isConcatenable(card, head):
 # * tableau dragon to stock
 # * tableau lower to tableau
 # * tableau number to stock
-class Solitaire:
+class Solitaire(object):
     def __init__(self):
         self.boardCleaner = BoardCleaner()
 
@@ -46,8 +49,7 @@ class Solitaire:
     def __getTableauToFoundation__(self, board):
         moves = []
         for col in board.tableau:
-            if col and col[-1].number and \
-                    col[-1].number == board.foundation[col[-1].color]+1:
+            if col and canAddToFoundation(board, col[-1]):
                 card = col.pop()
                 board.foundation[card.color] += 1
                 moves.append(deepcopy(board))
@@ -79,13 +81,12 @@ class Solitaire:
                 # To tableau
                 for col in board.tableau:
                     if not col and card.number or \
-                            col and isConcatenable(card, col[-1]):
+                            col and isAppendable(card, col[-1]):
                         col.append(card)
                         stockToTableau.append(deepcopy(board))
                         col.pop()
                 # To foundations
-                if card.number and \
-                        card.number == board.foundation[card.color] + 1:
+                if canAddToFoundation(board, card):
                     board.foundation[card.color] += 1
                     stockToFoundation.append(deepcopy(board))
                     board.foundation[card.color] -= 1 # recovery
@@ -96,7 +97,7 @@ class Solitaire:
         def addMoves(board, col, j, moves, isHead = False):
             card = col[j]
             for k, ncol in enumerate(board.tableau):
-                if ncol and isConcatenable(card, ncol[-1]):
+                if ncol and isAppendable(card, ncol[-1]):
                     stack = col[j:]; del col[j:]; ncol += stack
                     moves.append(deepcopy(board))
                     col += stack; del ncol[j - len(col):]
@@ -108,7 +109,7 @@ class Solitaire:
         topTabToTab, lowTabToTab, toEmpty = [], [], []
         for i, col in enumerate(board.tableau):
             for j in range(len(col) - 1, -1, -1):
-                if j == 0 or not isConcatenable(col[j], col[j - 1]):
+                if j == 0 or not isAppendable(col[j], col[j - 1]):
                     addMoves(board, col, j, topTabToTab, True)
                     break
                 else:

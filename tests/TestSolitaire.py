@@ -1,5 +1,6 @@
 from Board import Board
 from Board import Card
+from copy import copy
 from Solitaire import find
 from Solitaire import Solitaire
 import unittest
@@ -22,9 +23,11 @@ class TestSolitaire(unittest.TestCase):
 
     def testTableauToStock(self):
         game = Board(self.cards)
-        moves = self.sol.__getTableauToStock__(game)
-        for move in moves:
-            print move
+        draToStock, numToStock = self.sol.__getTableauToStock__(game)
+        self.assertEqual(len(draToStock), 0)
+        self.assertEqual(len(numToStock), 8)
+        #for move in numToStock:
+            #print move
 
     def testMovesFromStock(self):
         game = Board(self.cards)
@@ -32,15 +35,16 @@ class TestSolitaire(unittest.TestCase):
         game.stock[find(game.stock, None)] = game.tableau[-2].pop()
         game.stock[find(game.stock, None)] = game.tableau[-3].pop()
         game.tableau[-1] = []
-        print game
-        for move in self.sol.nextMove(game):
-            print move
+        #print game
+        #for move in self.sol.nextMove(game):
+            #print move
 
     def testTableauToFoundation(self):
         game = Board(self.cards)
         moves = self.sol.__getTableauToFoundation__(game)
-        for move in moves:
-            print move
+        self.assertEqual(len(moves), 3)
+        #for move in moves:
+            #print move
 
     def testTableauToTableau(self):
         cards = [Card(color, num) for color in range(3) \
@@ -48,41 +52,45 @@ class TestSolitaire(unittest.TestCase):
         cards += [Card(color, None) for color in range(3, 6) \
                 for i in range(4)]
         cards += [Card(6, None)]
-        game = Board(copy(cards))
-        print game
-        a, b = self.sol.__getTableauToTableau__(game)
-        for move in a + b:
-            print move
+        game = Board(cards)
+        topTabToTab,lowTabToTab,toEmpty = self.sol.__getTableauToTableau__(game)
+        self.assertEqual(len(topTabToTab), 5)
+        self.assertEqual(len(lowTabToTab), 6)
+        self.assertEqual(len(toEmpty), 0)
+        #for move in topTabToTab + lowTabToTab + toEmpty:
+            #print move
 
-    def testTableauToTableau2(self):
+    def testTableauToTableauToEmpty(self):
         cards = self.cards
         cards.reverse()
         game = Board(cards)
         game.tableau[0] = []
-        print game
-        a, b = self.sol.__getTableauToTableau__(game)
-        for move in a + b:
-            print move
+        topTabToTab,lowTabToTab,toEmpty = self.sol.__getTableauToTableau__(game)
+        self.assertEqual(len(toEmpty), 7)
+        #for move in topTabToTab + lowTabToTab + toEmpty:
+            #print move
 
-    def testTableauToTableau3(self):
+    def testTableauToTableauMixed(self):
         game = Board(self.cards)
         for i in range(len(game.tableau)):
             for j in range(i, len(game.tableau[0])):
                 game.tableau[i][j], game.tableau[j][i] = \
                         game.tableau[j][i],game.tableau[i][j]
         game.tableau[0] = []
-        print game
-        a, b = self.sol.__getTableauToTableau__(game)
-        for move in a + b:
-            print move
+        topTabToTab,lowTabToTab,toEmpty = self.sol.__getTableauToTableau__(game)
+        self.assertEqual(len(topTabToTab), 2)
+        self.assertEqual(len(lowTabToTab), 0)
+        self.assertEqual(len(toEmpty), 7)
+        #for move in topTabToTab + lowTabToTab + toEmpty:
+            #print move
 
     def testNextMove(self):
         game = Board(self.cards)
-        print game
-        for move in self.sol.nextMove(game):
-            print move
+        #print game
+        #for move in self.sol.nextMove(game):
+            #print move
 
-    def testNextMove2(self):
+    def _testNextMove2(self):
         cards = [Card(color, num) for color in range(3) \
                 for num in range(9, 0, -1)]
         cards += [Card(color, None) for color in range(3, 6) \
@@ -93,13 +101,13 @@ class TestSolitaire(unittest.TestCase):
         for move in self.sol.nextMove(game):
             print move
 
-    def testNextMoveRandom(self):
+    def _testNextMoveRandom(self):
         game = self.sol.newGame()
         print game
         for move in self.sol.nextMove(game):
             print move
 
-    def testNextMoveFinishing(self):
+    def _testNextMoveFinishing(self):
         game = Board()
         game.stock = [[], None, []]
         game.tableau = [[Card(0, 9)], [Card(5, None), Card(2, 7), Card(2, 8)],
@@ -109,7 +117,7 @@ class TestSolitaire(unittest.TestCase):
         for move in self.sol.nextMove(game):
             print move
 
-    def testNextMoveFinishing2(self):
+    def _testNextMoveFinishing2(self):
         game = Board()
         game.stock = [None, [], []]
         game.tableau = [[Card(1, 9), Card(3, None), Card(0, 9), Card(1, 8), 
@@ -122,7 +130,7 @@ class TestSolitaire(unittest.TestCase):
         for move in self.sol.nextMove(game):
             print move
 
-    def testNextMoveFinishing3(self):
+    def _testNextMoveFinishing3(self):
         game = Board()
         game.stock = [[], [], []]
         game.tableau = [[], [Card(0, 9), Card(0, 7)], [Card(2, 3), Card(1, 6)],
@@ -135,7 +143,7 @@ class TestSolitaire(unittest.TestCase):
         for move in self.sol.nextMove(game):
             print move
 
-    def testNextMoveFinishing4(self):
+    def _testNextMoveFinishing4(self):
         game = Board()
         game.stock = [[], [], []]
         game.tableau = [[Card(1, 5), Card(1, 7)], [Card(0, 9), Card(1, 8), Card(2, 7), Card(1, 6)], 
@@ -145,20 +153,3 @@ class TestSolitaire(unittest.TestCase):
         print game
         for move in self.sol.nextMove(game):
             print move
-
-if __name__ == "__main__":
-    ts = TestSolitaire()
-    #ts.testIsWin()
-    #ts.testTableauToStock()
-    #ts.testMovesFromStock()
-    #ts.testTableauToFoundation()
-    #ts.testTableauToTableau()
-    #ts.testTableauToTableau2()
-    #ts.testTableauToTableau3()
-    #ts.testNextMove()
-    #ts.testNextMove2()
-    #ts.testNextMoveRandom()
-    #ts.testNextMoveFinishing()
-    #ts.testNextMoveFinishing2()
-    #ts.testNextMoveFinishing3()
-    #ts.testNextMoveFinishing4()

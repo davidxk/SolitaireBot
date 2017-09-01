@@ -1,6 +1,11 @@
-from Solitaire import Solitaire
+from copy import deepcopy
+from dfs import dfs_wrapper
+from SolitaireMove import SolitaireMove
 
-def dfs(solitaire, limit, source = None, isPrint = True):
+def move_wrapper(solitaire, source = None, isPrint = False):
+    return dfs_wrapper(SolitaireMove(), source, isPrint=isPrint, impl = dfsMove)
+
+def dfsMove(solitaire, limit, source = None, isPrint = True):
     if source is None:
         source = solitaire.newGame()
     solitaire.__clear_board__(source)
@@ -12,7 +17,8 @@ def dfs(solitaire, limit, source = None, isPrint = True):
         if isPrint:
             print cnt
             print node
-        for child in solitaire.nextMove(node):
+        for move in solitaire.nextMove(node):
+            child = solitaire.getChild(deepcopy(node), move)
             solitaire.__clear_board__(child)
             if child not in parent:
                 front.append(child)
@@ -22,20 +28,8 @@ def dfs(solitaire, limit, source = None, isPrint = True):
         cnt += 1
     return None, None
 
-def dfs_wrapper(solitaire, source = None, isPrint = False, impl = dfs):
-    parent, target = impl(solitaire, 2000, source, isPrint = isPrint)
-    if not parent:
-        return None
-    node = target
-    path = [target]
-    while parent[node]:
-        path.append(parent[node])
-        node = parent[node]
-    path.reverse()
-    return path
-
 if __name__ == "__main__":
-    path = dfs_wrapper(Solitaire())
+    path = move_wrapper
     if path is None:
         print "Fail"
     else:

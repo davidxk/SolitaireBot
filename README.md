@@ -15,4 +15,4 @@ You will get the solution to the solitaire problem within a split of a second.
 
 ![Solitaire solution](solitaire_steps.png)
 
-The program implements a best first search algorithm that can solve 85% of random solitaire games. 
+The program implements a best first search algorithm that can solve 89% of random solitaire games. 
