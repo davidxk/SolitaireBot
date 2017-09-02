@@ -1,7 +1,7 @@
 from Board import Board
 from Board import Card
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageGrab
 
 class ScreenParser:
     """
@@ -11,7 +11,11 @@ class ScreenParser:
         self.recognizer = CardRecognizer()
         self.origin = None
 
-    def parse_screenshot(self, im_path):
+    def capture_screenshot(self, im_path='screenshot.png'):
+        im = ImageGrab.grab()
+        im.save(im_path)
+
+    def parse_screenshot(self, im_path='screenshot.png'):
         """
         Input a screenshot and return with Board
         """
