@@ -21,8 +21,11 @@ class ScreenParser:
         """
         self.origin = Image.open(im_path).convert('RGB')
         tableau = self.__split_tableau_area__()
-        foundation = self.__split_foundation_area_()
-        return Board(tableau=tableau, foundation=foundation)
+        foundation = self.__split_foundation_area__()
+        board = Board(tableau = tableau)
+        for card in foundation:
+            board.foundation[card.color] += 1
+        return board
 
     def __split_tableau_area__(self):
         (left, upper, right, lower) = (173, 310, 187, 324)
@@ -40,7 +43,7 @@ class ScreenParser:
                     break
         return tableau
 
-    def __split_foundation_area_(self):
+    def __split_foundation_area__(self):
         (left, upper, right, lower) = (933, 46, 947, 60)
 
         rs = 152
