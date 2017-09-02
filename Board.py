@@ -1,11 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+class OrderedDict(dict):
+    def __init__(self, orig):
+        self.color_map = {}
+        super(OrderedDict, self).__init__(orig)
+
+    def __setitem__(self, key, val):
+        if key not in self.color_map:
+            self.color_map[key] = len(self.color_map)
+        super(OrderedDict, self).__setitem__(key, val)
+
 class Board(object):
     def __init__(self, cards = None, tableau=None, foundation=None, stock=None):
         self.stock = stock or [None, None, None]
         self.tableau = tableau or [[] for i in range(8)]
-        self.foundation = foundation or { color: 0 for color in range(3) }
+        self.foundation = foundation or OrderedDict({ c: 0 for c in range(3) })
         if cards:
             for i in range(5):
                 for j in range(8):
