@@ -17,9 +17,9 @@ prt = { TAB_TO_FOUND: 4,
         TAB_TO_TAB: {True: 1, False: 7} }
 
 
-class SolitaireMove(Solitaire):
+class BestFirstSolitaire(Solitaire):
     def __init__(self):
-        super(SolitaireMove, self).__init__()
+        super(BestFirstSolitaire, self).__init__()
         self.cardmover = CardMover()
 
     def nextMove(self, board):

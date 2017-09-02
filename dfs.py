@@ -1,6 +1,7 @@
 from Solitaire import Solitaire
 
-def dfs(solitaire, limit, source = None, isPrint = True):
+def dfs(limit, source = None, isPrint = True):
+    solitaire = Solitaire()
     if source is None:
         source = solitaire.newGame()
     solitaire.__clear_board__(source)
@@ -22,8 +23,8 @@ def dfs(solitaire, limit, source = None, isPrint = True):
         cnt += 1
     return None, None
 
-def dfs_wrapper(solitaire, source = None, isPrint = False, impl = dfs):
-    parent, target = impl(solitaire, 2000, source, isPrint = isPrint)
+def dfs_wrapper(source = None, isPrint = False, impl = dfs):
+    parent, target = impl(2000, source, isPrint = isPrint)
     if not parent:
         return None
     node = target
@@ -35,7 +36,7 @@ def dfs_wrapper(solitaire, source = None, isPrint = False, impl = dfs):
     return path
 
 if __name__ == "__main__":
-    path = dfs_wrapper(Solitaire())
+    path = dfs_wrapper()
     if path is None:
         print "Fail"
     else:

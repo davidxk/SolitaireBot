@@ -2,19 +2,14 @@
 # -*- coding: utf-8 -*-
 
 class Board(object):
-    def __init__(self, cards = None, tableau = None, foundation = None):
-        self.stock = [None, None, None]
-        self.tableau = [[] for i in range(8)]
-        self.foundation = { color: 0 for color in range(3) }
+    def __init__(self, cards = None, tableau=None, foundation=None, stock=None):
+        self.stock = stock or [None, None, None]
+        self.tableau = tableau or [[] for i in range(8)]
+        self.foundation = foundation or { color: 0 for color in range(3) }
         if cards:
             for i in range(5):
                 for j in range(8):
                     self.tableau[j].append(cards.pop())
-        if tableau:
-            self.tableau = tableau
-        if foundation:
-            for card in foundation:
-                self.foundation[card.color] = card.number
 
     def __str__(self):
         return unicode(self).encode('utf-8')

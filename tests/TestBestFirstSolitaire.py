@@ -1,13 +1,13 @@
 from Board import Board
 from Board import Card
 from copy import deepcopy
-from SolitaireMove import SolitaireMove
+from BestFirstSolitaire import BestFirstSolitaire
 from Solitaire import find
 import unittest
 
-class TestSolitaireMove(unittest.TestCase):
+class TestBestFirstSolitaire(unittest.TestCase):
     def setUp(self):
-        self.sol = SolitaireMove()
+        self.sol = BestFirstSolitaire()
         self.cards = [Card(color, num) for num in range(1, 10) \
                 for color in range(3)]
         self.cards += [Card(color, None) for color in range(3, 6) \

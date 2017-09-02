@@ -5,7 +5,7 @@
 from Board import Board
 from Board import Card
 from dfs import dfs_wrapper
-from dfsMove import move_wrapper
+from DFSAgent import DFSAgent
 from Solitaire import Solitaire
 from test_cases import testCases
 
@@ -20,7 +20,7 @@ class TestSearchMethod:
     def testNextMoveCases(self, i, isPrint = False):
         board = Board()
         board.tableau = testCases[i - 1]
-        path = self.search(self.sol, source = board, isPrint = isPrint)
+        path = self.search(source = board, isPrint = isPrint)
         if path:
             print "Case %d: %d steps" % (i, len(path))
         else:
@@ -30,7 +30,7 @@ class TestSearchMethod:
         cnt = 100
         for i in range(100):
             print i
-            path = self.search(self.sol)
+            path = self.search()
             if path is None:
                 cnt -= 1
                 print "fail"
@@ -39,7 +39,7 @@ class TestSearchMethod:
     def getAverageDepth(self):
         cnt, totalLenth, maximum = 0, 0, 0
         for i in range(100):
-            path = dfs_wrapper(self.sol)
+            path = dfs_wrapper()
             if path is not None:
                 cnt += 1; totalLenth += len(path)
                 maximum = max(len(path), maximum)
@@ -48,6 +48,7 @@ class TestSearchMethod:
         print maximum
 
 if __name__ == "__main__":
+    da = DFSAgent()
     td = TestSearchMethod(dfs_wrapper)
     #td.testNextMoveRandom()
     #td.testNextMoveCases(1)
@@ -59,5 +60,5 @@ if __name__ == "__main__":
     #td.testNextMoveCases(7)
     #td.testNextMoveCases(8)
     #td.testNextMoveCases(9)
-    td.testSuccessRate()
+    #td.testSuccessRate()
     #td.getAverageDepth()
