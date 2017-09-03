@@ -10,7 +10,7 @@
 + is win: board -> bool
 
 ## Board Cleaner: helper class
-+ clear board: board -> board
++ clear board: on board
 + clear and get: board -> board, foundation:{color: index}, dragon: [color]
 
 ## Board: State
@@ -61,20 +61,18 @@ TAB_TO_TAB  |下到空| ∞
 ## Best First Solitaire
 + next move: board -> [move]
 
-## Move
-+ priority
-+ type
-+ parameters
-- \_\_lt\_\_: for sorting
-- \_\_str\_\_: for printing
-
 ## Card Mover
 + init foundation
 + make move: board, move -> board
 
 ## GUI Controller
 + foundation map
-- init foundation: board -> foundation map
-- update foundation: ? -> foundation map
 + execute: [node, move]
 + press New Game
+
+## main
+* GUI Controller starts game
+* Screen Parser save screenshot
+* Screen Parser parse screenshot
+* DFS Agent calculate moves
+* GUI Controller executes plan

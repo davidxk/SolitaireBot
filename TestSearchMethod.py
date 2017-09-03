@@ -15,7 +15,7 @@ class TestSearchMethod:
         self.search = search
 
     def testNextMoveRandom(self):
-        self.search(self.sol)
+        self.search()
 
     def testNextMoveCases(self, i, isPrint = False):
         board = Board()
@@ -49,8 +49,8 @@ class TestSearchMethod:
 
 if __name__ == "__main__":
     da = DFSAgent()
-    td = TestSearchMethod(dfs_wrapper)
-    #td.testNextMoveRandom()
+    td = TestSearchMethod(da.getPath)
+    td.testNextMoveRandom()
     #td.testNextMoveCases(1)
     #td.testNextMoveCases(2)
     #td.testNextMoveCases(3)
