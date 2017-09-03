@@ -14,7 +14,7 @@ def depth_limited(solitaire, limit = 55, source = None):
         moves = solitaire.nextMove(source)
         moves.reverse()
         for child in moves:
-            solitaire.__clear_board__(child)
+            solitaire.clearBoard(child)
             path.append(child)
             if helper(child, limit - 1, path, result):
                 return result
@@ -23,6 +23,6 @@ def depth_limited(solitaire, limit = 55, source = None):
 
     if source is None:
         source = solitaire.newGame()
-    solitaire.__clear_board__(source)
+    solitaire.clearBoard(source)
     visited = set()
     return helper(source, limit, [source], [])

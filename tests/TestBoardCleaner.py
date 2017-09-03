@@ -1,6 +1,6 @@
 from Board import Board
 from Board import Card
-from Solitaire import BoardCleaner
+from BoardCleaner import BoardCleaner
 from Solitaire import Solitaire
 import unittest
 
@@ -34,7 +34,8 @@ class TestBoardCleaner(unittest.TestCase):
 
     def testClearBoard(self):
         board = Board(self.cards)
-        self.bc.clearBoard(board)
+        dragons, n = self.bc.clearBoard(board)
+        self.assertEqual(dragons, [3, 5, 4])
         self.assertTrue(Solitaire().isWin(board))
 
 if __name__ == "__main__":

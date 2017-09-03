@@ -24,7 +24,7 @@ class DFSAgent:
     def __dfs__(self, solitaire, limit, source = None, isPrint = True):
         if source is None:
             source = solitaire.newGame()
-        solitaire.__clear_board__(source)
+        solitaire.clearBoard(source)
         front = [source]
         parent = {source: None}
         cnt = 0
@@ -35,7 +35,7 @@ class DFSAgent:
                 print node
             for move in solitaire.nextMove(node):
                 child = solitaire.getChild(deepcopy(node), move)
-                solitaire.__clear_board__(child)
+                solitaire.clearBoard(child)
                 if child not in parent:
                     front.append(child)
                     parent[child] = (node, move)

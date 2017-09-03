@@ -4,7 +4,7 @@ def dfs(limit, source = None, isPrint = True):
     solitaire = Solitaire()
     if source is None:
         source = solitaire.newGame()
-    solitaire.__clear_board__(source)
+    solitaire.clearBoard(source)
     front = [source]
     parent = {source: None}
     cnt = 0
@@ -14,7 +14,7 @@ def dfs(limit, source = None, isPrint = True):
             print cnt
             print node
         for child in solitaire.nextMove(node):
-            solitaire.__clear_board__(child)
+            solitaire.clearBoard(child)
             if child not in parent:
                 front.append(child)
                 parent[child] = node
