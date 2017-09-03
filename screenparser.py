@@ -24,7 +24,8 @@ class ScreenParser:
         foundation = self.__split_foundation_area__()
         board = Board(tableau = tableau)
         for card in foundation:
-            board.foundation[card.color] += 1
+            for i in range(card.number):
+                board.foundation.addToFoundation(card.color)
         return board
 
     def __split_tableau_area__(self):

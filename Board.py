@@ -6,10 +6,10 @@ class OrderedDict(dict):
         self.color_map = {}
         super(OrderedDict, self).__init__(orig)
 
-    def __setitem__(self, key, val):
-        if key not in self.color_map:
-            self.color_map[key] = len(self.color_map)
-        super(OrderedDict, self).__setitem__(key, val)
+    def addToFoundation(self, color):
+        if color not in self.color_map:
+            self.color_map[color] = len(self.color_map)
+        self.__setitem__(color, self.__getitem__(color) + 1)
 
 class Board(object):
     def __init__(self, cards = None, tableau=None, foundation=None, stock=None):

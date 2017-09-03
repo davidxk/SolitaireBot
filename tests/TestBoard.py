@@ -1,5 +1,6 @@
 from Board import Card
 from Board import Board
+from Board import OrderedDict
 from copy import deepcopy
 from random import shuffle
 import unittest
@@ -11,6 +12,23 @@ class TestCard(unittest.TestCase):
                 print Card(color, number).toString(True)
         for color in range(3, 7):
             print Card(color, None).toString(True)
+
+class TestOrderedDict(unittest.TestCase):
+    def testFoundation(self):
+        board = Board()
+        found = board.foundation
+        self.assertEqual(len(found.color_map), 0)
+        found.addToFoundation(1)
+        found.addToFoundation(2)
+        found.addToFoundation(1)
+        self.assertEqual(found.color_map[1], 0)
+        self.assertEqual(found.color_map[2], 1)
+        self.assertTrue(0 not in found.color_map)
+        self.assertEqual(found[1], 2)
+        self.assertEqual(found[2], 1)
+        found.addToFoundation(0)
+        self.assertEqual(found.color_map[0], 2)
+        self.assertEqual(found[0], 1)
 
 class TestBoard(unittest.TestCase):
     def setUp(self):
