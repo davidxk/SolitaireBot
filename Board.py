@@ -52,21 +52,33 @@ class Board(object):
             output += "\n"
         return output
 
+    """
     def __repr__(self):
         key = str(self.stock)
         key += str(self.tableau)
         key += str([self.foundation[color] for color in range(3)])
         return key
+    """
 
     def __eq__(self, other):
         return self.stock == other.stock and self.tableau == other.tableau and\
                 self.foundation == other.foundation
 
     def __hash__(self):
-        key = str(self.stock)
-        key += str(self.tableau)
-        key += str([self.foundation[color] for color in range(3)])
-        return hash(key)
+        code = 0
+        for card in self.stock:
+            if card is None:
+                code = code * 100 + 70
+            elif card == []:
+                code = code * 100 + 80
+            else:
+                code = code * 100 + card.color * 10 + (card.number or 0)
+        for col in self.tableau:
+            for card in col:
+                if card.number:
+                    code = code * 100 + card.color * 10 + (card.number or 0)
+            code = code * 100 + 70
+        return hash(code)
 
 mapping = {0:u"饼", 1:u"条", 2:u"万", 3:u"中", 4:u"发", 5:u"白", 6:u"花"}
 colormap = {0: "red", 1: "green", 2: "white", 3: "red", 4: "green", \
