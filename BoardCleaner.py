@@ -2,17 +2,21 @@ from collections import defaultdict
 class BoardCleaner:
     def clearBoard(self, board):
         self.__clear_flower__(board)
-        cnt = -1
-        dragons = []
+        plan = []
         dragonSlayed = []
         clearedFound = True
         while dragonSlayed or clearedFound:
-            dragonSlayed = self.__clear_dragon__(board)
             clearedFound = self.__clear_foundation__(board)
             self.__clear_flower__(board)
-            dragons += dragonSlayed
-            cnt += 1
-        return dragons, cnt
+            if not clearedFound:
+                dragonSlayed = self.__clear_dragon__(board)
+                plan += dragonSlayed
+                self.__clear_flower__(board)
+            else:
+                if not plan or type(plan[-1]) is int:
+                    plan.append([0])
+                plan[-1][0] += 1
+        return plan
 
     def __clear_flower__(self, board):
         for col in board.tableau:

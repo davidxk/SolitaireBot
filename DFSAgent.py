@@ -1,5 +1,6 @@
 from Board import Board
 from copy import copy
+from copy import deepcopy
 from dfs import dfs_wrapper
 from BestFirstSolitaire import BestFirstSolitaire
 
@@ -36,7 +37,7 @@ class DFSAgent:
                 print node
             for move in solitaire.nextMove(node):
                 replica = Board(None, [col[:] for col in node.tableau],
-                    copy(node.foundation), copy(node.stock))
+                    deepcopy(node.foundation), copy(node.stock))
                 child = solitaire.getChild(replica, move)
                 solitaire.clearBoard(child)
                 if child not in parent:

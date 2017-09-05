@@ -37,10 +37,12 @@ class GUIController:
         for board, move in path:
             coords = self.getCoords[move[2]](board, move)
             self.dragMouse(coords[0], coords[1])
-            dragons, n = self.sol.clearBoard(self.sol.getChild(board, move))
-            sleep(n * 0.3)
-            for dragon in dragons:
-                self.slayDragon(dragon)
+            plan = self.sol.clearBoard(self.sol.getChild(board, move))
+            for item in plan:
+                if type(item) is int:
+                    self.slayDragon(item)
+                else:
+                    sleep(item.pop() * 0.3)
         sleep(5)
 
     def clickMouse(self, coord):
