@@ -2,11 +2,10 @@
 A bot for the solitaire game in Zachtronics's SHENZHEN I/O that helps you get the "Become Immortal" achievement. Once you enter the game, it will play the game automatically one game after another until the 100th game. 
 
 ## Getting Started
-The bot requires ```Pillow``` and ```PyAutoGUI``` in py2 and must be run under 1440 * 900 resolution. To install ```Pillow``` and ```PyAutoGUI```, run
+The bot requires ```Pillow``` ```numpy``` and ```PyAutoGUI``` in py2 and must be run under 1440 * 900 resolution. To install these dependencies, run
 
 ```
-pip install pillow
-pip install pyautogui
+pip install -r requirements.txt
 ```
 
 To run the bot, enter SHENZHEN I/O and solitaire and run following command
